@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shudailaoshi.dao.ver.VersionDao">
+
+ 	<resultMap id="versionMap" type="Version">
+	    <id column="id" property="id" jdbcType="BIGINT" />
+		<result column="version_number" property="versionNumber" jdbcType="BIGINT" />
+		<result column="system_id" property="systemId" jdbcType="BIGINT" />
+		<result column="predict_start_time" property="predictStartTime" jdbcType="BIGINT" />
+		<result column="predict_publish_time" property="predictPublishTime" jdbcType="BIGINT" />
+		<result column="development_time" property="developmentTime" jdbcType="BIGINT" />
+		<result column="uptime" property="uptime" jdbcType="BIGINT" />
+		<result column="create_time" property="createTime" jdbcType="BIGINT" />
+		<result column="modify_time" property="modifyTime" jdbcType="BIGINT" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+	</resultMap>
+
+	<sql id="listWhere">
+		<where>
+			<if test="versionQuery!=null">
+				<if test="versionQuery.versionNumber!=null">
+					 and version_number = #{versionQuery.versionNumber} 
+				</if>
+				<if test="versionQuery.systemId!=null">
+					 and system_id = #{versionQuery.systemId} 
+				</if>
+				<if test="versionQuery.predictStartTime!=null">
+					 and predict_start_time = #{versionQuery.predictStartTime} 
+				</if>
+				<if test="versionQuery.predictPublishTime!=null">
+					 and predict_publish_time = #{versionQuery.predictPublishTime} 
+				</if>
+				<if test="versionQuery.developmentTime!=null">
+					 and development_time = #{versionQuery.developmentTime} 
+				</if>
+				<if test="versionQuery.uptime!=null">
+					 and uptime = #{versionQuery.uptime} 
+				</if>
+				
+				<if test="@com.shudailaoshi.utils.ValidUtil@isNotBlank(versionQuery.startDate)">
+					and FROM_UNIXTIME(create_time/1000,'%Y-%m-%d') <![CDATA[>=]]> #{versionQuery.startDate}
+				</if>
+				<if test="@com.shudailaoshi.utils.ValidUtil@isNotBlank(versionQuery.endDate)">
+					and FROM_UNIXTIME(create_time/1000,'%Y-%m-%d') <![CDATA[<=]]> #{versionQuery.endDate}
+				</if>
+			</if>
+		</where>
+	</sql>
+
+	<select id="listVersion" resultMap="versionMap">
+		select *
+		from ver_version
+		<include refid="listWhere" />
+		<if test="versionQuery.sort!=null">
+		order by ${com.shudailaoshi.utils.StringUtil@camelhumpToUnderline(versionQuery.sort.property)} ${versionQuery.sort.direction}
+		</if>
+		<if test="start!=null and limit!=null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="countVersion" resultType="java.lang.Long">
+		select count(*) from ver_version
+		<include refid="listWhere" />
+	</select>
+
+</mapper>

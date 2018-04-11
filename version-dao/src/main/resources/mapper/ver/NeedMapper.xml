@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.shudailaoshi.dao.ver.NeedDao">
+
+ 	<resultMap id="needMap" type="Need">
+	    <id column="id" property="id" jdbcType="BIGINT" />
+		<result column="need_name" property="needName" jdbcType="VARCHAR" />
+		<result column="take" property="take" jdbcType="INTEGER" />
+		<result column="develop_name" property="developName" jdbcType="VARCHAR" />
+		<result column="system_id" property="systemId" jdbcType="BIGINT" />
+		<result column="version_id" property="versionId" jdbcType="BIGINT" />
+		<result column="status" property="status" jdbcType="VARCHAR" />
+		<result column="test_status" property="testStatus" jdbcType="VARCHAR" />
+		<result column="test_name" property="testName" jdbcType="VARCHAR" />
+		<result column="create_time" property="createTime" jdbcType="BIGINT" />
+		<result column="modify_time" property="modifyTime" jdbcType="BIGINT" />
+	</resultMap>
+
+	<sql id="listWhere">
+		<where>
+			<if test="needQuery!=null">
+				<if test="@com.shudailaoshi.utils.ValidUtil@isNotBlank(needQuery.needName)">
+					 and need_name like concat('%',#{needQuery.needName},'%') 
+				</if>
+				<if test="needQuery.take!=null">
+					 and take = #{needQuery.take} 
+				</if>
+				<if test="@com.shudailaoshi.utils.ValidUtil@isNotBlank(needQuery.developName)">
+					 and develop_name like concat('%',#{needQuery.developName},'%') 
+				</if>
+				<if test="needQuery.systemId!=null">
+					 and system_id = #{needQuery.systemId} 
+				</if>
+				<if test="needQuery.versionId!=null">
+					 and version_id = #{needQuery.versionId} 
+				</if>
+				<if test="@com.shudailaoshi.utils.ValidUtil@isNotBlank(needQuery.testStatus)">
+					 and test_status like concat('%',#{needQuery.testStatus},'%') 
+				</if>
+				<if test="@com.shudailaoshi.utils.ValidUtil@isNotBlank(needQuery.testName)">
+					 and test_name like concat('%',#{needQuery.testName},'%') 
+				</if>
+				
+				<if test="@com.shudailaoshi.utils.ValidUtil@isNotBlank(needQuery.startDate)">
+					and FROM_UNIXTIME(create_time/1000,'%Y-%m-%d') <![CDATA[>=]]> #{needQuery.startDate}
+				</if>
+				<if test="@com.shudailaoshi.utils.ValidUtil@isNotBlank(needQuery.endDate)">
+					and FROM_UNIXTIME(create_time/1000,'%Y-%m-%d') <![CDATA[<=]]> #{needQuery.endDate}
+				</if>
+			</if>
+		</where>
+	</sql>
+
+	<select id="listNeed" resultMap="needMap">
+		select *
+		from ver_need
+		<include refid="listWhere" />
+		<if test="needQuery.sort!=null">
+		order by ${com.shudailaoshi.utils.StringUtil@camelhumpToUnderline(needQuery.sort.property)} ${needQuery.sort.direction}
+		</if>
+		<if test="start!=null and limit!=null">
+			limit #{start},#{limit}
+		</if>
+	</select>
+
+	<select id="countNeed" resultType="java.lang.Long">
+		select count(*) from ver_need
+		<include refid="listWhere" />
+	</select>
+
+</mapper>
